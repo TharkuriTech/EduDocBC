@@ -32,48 +32,37 @@ contract StudentCertificate{
     require(Owner == add,"you don't have access to proceed further");
     _;
    }
-   modifier isAccess(bytes userName,bytes Password,address add){
-    require(Owner == add || (StaffCredentials[userName] == Password)) ,"you are not authorized");
+   modifier isAccess(string memory userName,string memory Password,address add){
+    require(Owner == add || (keccak256(StaffCredentials[bytes(userName)]) == keccak256(bytes(Password))) ,"you are not authorized");
     _;
    }
 
-   function StaffRegistration(string memory StaffName, string memory Password) public isOwner(msg.sender) returns(bool status,bytes Message){
-     if(StaffCredentials[StaffName])
-     {
-        status = false;
-        Message = "Staff Already exisit";
-     }
-     else{
-        StaffCredentials[StaffName] = Password;
-        status = true;
-        Message = "Successfully added";
-     }
-     return;
+   function StaffRegistration(string memory StaffName, string memory Password) public isOwner(msg.sender) returns(bool status,bytes memory Message){
+        if(StaffCredentials[bytes(StaffName)].length != 0)
+        {
+            status = false;
+            Message = "Staff Already exisit";
+        }
+        else{
+            StaffCredentials[bytes(StaffName)] = bytes(Password);
+            status = true;
+            Message = "Successfully added";
+        }
    }
 
-   function CreateCertificate(string memory userName, string memory Password, string memory StudentName, string memory DOB,  string memory FatherName,  string memory UniversityCode, 
-        string memory CollegeCode, 
-        string memory Degree,
-        string memory Stream,
-        string memory Grade,
-        string memory Year,
-        string memory StudentNumber,
-        string memory CertificateNumber,
-        string memory CertificateAuthorizedPerson,
-        string memory IssuedDate
+   function CreateCertificate(string memory userName, string memory Password, CertificateDetails memory details
 
-) public isAccess(bytes(userName),bytes(Password),msg.sender) returns (bool status,bytes Message){
-    if(StaffCredentials[StaffName])
-     {
-        status = false;
-        Message = "Staff Already exisit";
-     }
-     else{
-        StaffCredentials[StaffName] = Password;
-        status = true;
-        Message = "Successfully added";
-     }
-     return;
+) public isAccess(userName,Password,msg.sender) returns (bool status,bytes memory Message){
+    // if(StaffCredentials[bytes(StudentNumber)])
+    //  {
+    //     status = false; 
+    //     Message = "Staff Already exisit";
+    //  }
+    //  else{
+    //     StaffCredentials[bytes(StudentNumber)] = Password;
+    //     status = true;
+    //     Message = "Successfully added";
+    //  }
 
 }
 
