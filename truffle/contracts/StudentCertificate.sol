@@ -3,6 +3,7 @@ pragma solidity >=0.4.22 <0.9.0;
 
 contract StudentCertificate {
     address public Owner;
+
     struct UniversityDetails {
         bytes UserName;
         bytes Password;
@@ -49,12 +50,12 @@ contract StudentCertificate {
         string memory Password,
         address add
     ) {
+        UniversityDetails storage university = UniversityCredentials[bytes(UCode)];
+
         require(
-            (UniversityCredentials[bytes(UCode)].length != 0 &&
-                keccak256(UniversityCredentials[bytes(UCode)].UserName) ==
-                keccak256(bytes(userName)) &&
-                keccak256(UniversityCredentials[bytes(UCode)].Password) ==
-                keccak256(bytes(Password))),
+            keccak256(university.UserName) == keccak256(bytes(userName)) &&
+            keccak256(university.Password) == keccak256(bytes(Password)) &&
+            university.Add == add,
             "you are not authorized"
         );
         _;
@@ -67,7 +68,7 @@ contract StudentCertificate {
     ) {
         bool isAccess = false;
         if (StaffCredentials[bytes(UCode)].length != 0) {
-            StaffDetails[] SD = StaffCredentials[bytes(UCode)];
+            StaffDetails[] memory SD = StaffCredentials[bytes(UCode)];
             for (uint128 i = 0; i < SD.length; i++) {
                 if (
                     keccak256(StaffCredentials[bytes(UCode)][i].UserName) ==
@@ -90,28 +91,30 @@ contract StudentCertificate {
         string memory Password,
         address _add
     ) public isOwner(msg.sender) returns (bool status, bytes memory Message) {
-        UniversityDetails UD;
-        UD.UserName = bytes(StaffName);
+        UniversityDetails memory UD;
+        UD.UserName = bytes(UName);
         UD.Password = bytes(Password);
         UD.Add = _add;
-        UniversityCredentials[bytes(UCode)] = SD;
+        UniversityCredentials[bytes(UCode)] = UD;
         status = true;
         Message = "Successfully inserted";
     }
+
     function UpdateUniversityDetails(
         string memory UCode,
         string memory UName,
         string memory Password,
-        string memory OldPassword,
         address _add,
         bool IsRemove
     ) public isOwner(msg.sender) returns (bool status, bytes memory Message) {
-        if (IsRemove) delete UniversityCredentials[bytes(UCode)];
-        else {
-            staffDetails SD;
-            SD.Password = bytes(Password);
-            SD.Add = _add;
-            UniversityCredentials[bytes(UCode)] = SD;
+        if (IsRemove) {
+            delete UniversityCredentials[bytes(UCode)];
+        } else {
+            UniversityDetails memory UD;
+            UD.UserName = bytes(UName);
+            UD.Password = bytes(Password);
+            UD.Add = _add;
+            UniversityCredentials[bytes(UCode)] = UD;
         }
         status = true;
         Message = "Successfully updated";
@@ -127,7 +130,7 @@ contract StudentCertificate {
         isUniversityAccess(UCode, StaffName, Password, msg.sender)
         returns (bool status, bytes memory Message)
     {
-        StaffDetails SD;
+        StaffDetails memory SD;
         SD.UserName = bytes(StaffName);
         SD.Password = bytes(Password);
         SD.Add = _add;
@@ -135,6 +138,7 @@ contract StudentCertificate {
         status = true;
         Message = "Successfully inserted";
     }
+
     function UpdateStaffDetails(
         string memory UCode,
         string memory StaffName,
@@ -147,20 +151,19 @@ contract StudentCertificate {
         isUniversityAccess(UCode, StaffName, OldPassword, msg.sender)
         returns (bool status, bytes memory Message)
     {
-        StaffDetails[] SD = StaffCredentials[bytes(UCode)];
+        StaffDetails[] storage SD = StaffCredentials[bytes(UCode)];
         for (uint128 i = 0; i < SD.length; i++) {
             if (
-                keccak256(StaffCredentials[bytes(UCode)][i].UserName) ==
-                keccak256(bytes(userName)) &&
-                keccak256(StaffCredentials[bytes(UCode)][i].Password) ==
+                keccak256(SD[i].UserName) ==
+                keccak256(bytes(StaffName)) &&
+                keccak256(SD[i].Password) ==
                 keccak256(bytes(Password))
             ) {
-                if (IsRemove) delete UniversityCredentials[bytes(UCode)];
-                else {
-                    staffDetails SD = StaffCredentials[bytes(UCode)][i];
-                    SD.Password = bytes(Password);
-                    SD.Add = _add;
-                    StaffCredentials[bytes(UCode)].push(SD);
+                if (IsRemove) {
+                    delete StaffCredentials[bytes(UCode)][i];
+                } else {
+                    SD[i].Password = bytes(Password);
+                    SD[i].Add = _add;
                 }
                 break;
             }
@@ -176,50 +179,51 @@ contract StudentCertificate {
         CertificateDetails memory details
     )
         public
-        isStaffAccess(details.UniversityCode, userName, Password)
+        isStaffAccess(string(details.UniversityCode), userName, Password)
         returns (bool status, bytes memory Message)
     {
-        if (
-            Certificates[bytes(CertificateDetails.CertificateNumber)].length !=
-            0
-        ) {
+        if (bytes(Certificates[bytes(details.CertificateNumber)].CertificateNumber).length != 0) {
             status = false;
-            Message = "Certificate Already exisit";
+            Message = "Certificate Already exists";
         } else {
-            Certificates[bytes(CertificateDetails.CertificateNumber)] = details;
+            Certificates[bytes(details.CertificateNumber)] = details;
             status = true;
             Message = "Successfully added";
         }
     }
+
     function UpdateCertificate(
         string memory userName,
         string memory Password,
         CertificateDetails memory details
     )
         public
-        isStaffAccess(details.UniversityCode, userName, Password)
+        isStaffAccess(string(details.UniversityCode), userName, Password)
         returns (bool status, bytes memory Message)
     {
-        Certificates[bytes(CertificateDetails.CertificateNumber)] = details;
+        Certificates[bytes(details.CertificateNumber)] = details;
         status = true;
-        Message = "Updated added";
+        Message = "Successfully updated";
     }
+
     function GetCertificate(
         string memory DOB,
         string memory RollNumber,
         string memory CertificateNumber
     )
-        public
+        public view
         returns (CertificateDetails memory details, string memory Message)
     {
-        CertificateDetails Certdetails = Certificates[bytes(CertificateNumber)];
+        CertificateDetails memory Certdetails = Certificates[bytes(CertificateNumber)];
 
         if (
-            keccak256(details.DOB) == keccak256(DOB) &&
-            keccak256(details.StudentNumber) == keccak256(RollNumber) &&
-            keccak256(details.CertificateNumber) == keccak256(CertificateNumber)
+            keccak256(Certdetails.DOB) == keccak256(bytes(DOB)) &&
+            keccak256(Certdetails.StudentNumber) == keccak256(bytes(RollNumber)) &&
+            keccak256(Certdetails.CertificateNumber) == keccak256(bytes(CertificateNumber))
         ) {
-            details = Certdetail;
-        } else Message = "Not Found";
+            details = Certdetails;
+        } else {
+            Message = "Not Found";
+        }
     }
 }
