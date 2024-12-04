@@ -1,9 +1,6 @@
 import { EthProvider } from "./contexts/EthContext";
-import Intro from "./components/Intro/";
-import Setup from "./components/Setup";
-import Demo from "./components/Demo";
-import Footer from "./components/Footer";
 import Home from "./components/Home";
+import SignIn from "./components/signin";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 function App() {
   const theme = createTheme({
@@ -42,27 +39,15 @@ function App() {
         fontSize: "0.875rem",
       },
     },
-    // Add any other custom theme settings you need here
   });
   return (
     <EthProvider>
       <ThemeProvider theme={theme}>
-        <Home />
+        {/* <Home /> */}
+        <SignIn />
       </ThemeProvider>
     </EthProvider>
-    //
-    //   <div id="App">
-    //     <div className="container">
-    //       <Intro />
-    //       <hr />
-    //       <Setup />
-    //       <hr />
-    //       <Demo />
-    //       <hr />
-    //       <Footer />
-    //     </div>
-    //   </div>
-    //
+    
   );
 }
 
