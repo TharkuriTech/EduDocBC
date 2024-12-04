@@ -45,10 +45,12 @@ function App() {
     // Add any other custom theme settings you need here
   });
   return (
-    <ThemeProvider theme={theme}>
-    <Home />
-    </ThemeProvider>
-    // <EthProvider>
+    <EthProvider>
+      <ThemeProvider theme={theme}>
+        <Home />
+      </ThemeProvider>
+    </EthProvider>
+    //
     //   <div id="App">
     //     <div className="container">
     //       <Intro />
@@ -60,7 +62,7 @@ function App() {
     //       <Footer />
     //     </div>
     //   </div>
-    // </EthProvider>
+    //
   );
 }
 
