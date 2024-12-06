@@ -1,6 +1,7 @@
 import { EthProvider } from "./contexts/EthContext";
 import Home from "./components/Home";
 import SignIn from "./components/signin";
+import Registration from "./components/Registration";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 function App() {
   const theme = createTheme({
@@ -44,7 +45,8 @@ function App() {
     <EthProvider>
       <ThemeProvider theme={theme}>
         {/* <Home /> */}
-        <SignIn />
+        {/* <SignIn /> */}
+        <Registration />
       </ThemeProvider>
     </EthProvider>
     
