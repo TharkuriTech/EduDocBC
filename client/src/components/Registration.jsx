@@ -38,6 +38,8 @@ const StyledCard = styled(Box)(({ theme }) => ({
   
 
 export default function StaffRegistrationForm() {
+  const db = require("../firebase");
+
   const [formData, setFormData] = React.useState({
     university: "",
     staffName: "",
@@ -77,10 +79,16 @@ export default function StaffRegistrationForm() {
     return isValid;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      console.log("Form Submitted", formData);
+      try {
+        await db.collection("staff").add(formData);
+        console.log("Data inserted successfully!");
+        handleClear(); // Clear the form after successful submission
+      } catch (error) {
+        console.error("Error adding document: ", error);
+      }
     }
   };
 
