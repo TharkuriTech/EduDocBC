@@ -41,7 +41,7 @@ module.exports = {
     new EslintWebpackPlugin({ extensions }),
     new HtmlWebpackPlugin({
       template: "./public/index.html",
-      favicon: "./public/favicon.ico",
+      favicon: "./public/fav.ico",
     }),
     new Dotenv({
       path: '.env', // Load your .env file
