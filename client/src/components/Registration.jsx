@@ -10,6 +10,9 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import { styled } from "@mui/material/styles";
+import database from '../firebase';
+
+
 
 const StyledCard = styled(Box)(({ theme }) => ({
     backgroundColor: "#fff",
@@ -83,8 +86,16 @@ export default function StaffRegistrationForm() {
     e.preventDefault();
     if (validateForm()) {
       try {
-        await db.collection("staff").add(formData);
-        console.log("Data inserted successfully!");
+  
+        database
+            .ref("staff").set(formData)
+            //.push(formData)
+            .then(() => {
+              console.log("Data appended successfully");
+              localStorage.setItem("logDetailsInserted", "true");
+            })
+            .catch((error) => console.error("Error appending data:", error));
+  
         handleClear(); // Clear the form after successful submission
       } catch (error) {
         console.error("Error adding document: ", error);
