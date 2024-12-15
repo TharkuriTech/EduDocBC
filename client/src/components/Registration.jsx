@@ -53,7 +53,15 @@ const StyledButton = styled(Button)(({ theme }) => ({
   padding: "0 20px",
   borderRadius: "6px",
 }));
-
+const StyledTableHead = styled(TableRow)(({ theme }) => ({
+  backgroundColor: theme.palette.primary.main,
+  "& th": {
+    color: theme.palette.common.white,
+    fontWeight: "bold",
+    textAlign: "center",
+    padding: theme.spacing(1.5),
+  },
+}));
 export default function StaffRegistrationForm() {
   const [formData, setFormData] = useState({
     university: "",
@@ -314,7 +322,7 @@ export default function StaffRegistrationForm() {
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
-                <TableRow>
+              <StyledTableHead>
                   <TableCell>University</TableCell>
                   <TableCell>Staff Name</TableCell>
                 <TableCell>Username</TableCell>
@@ -322,7 +330,7 @@ export default function StaffRegistrationForm() {
                 <TableCell>Phone Number</TableCell>
                 <TableCell>Certificate Access</TableCell>
                 <TableCell>Actions</TableCell>
-                </TableRow>
+                </StyledTableHead>
               </TableHead>
               <TableBody>
                 {staffList.map((staff) => (
