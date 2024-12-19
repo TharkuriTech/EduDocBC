@@ -3,6 +3,8 @@ import Home from "./components/Home";
 import SignIn from "./components/signin";
 import UniversityManagement from "./components/UniversityManagement";
 import StaffManagement from "./components/StaffManagement";
+import CertificateRegistration from "./components/ManageCertificate";
+
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 function App() {
   const theme = createTheme({
@@ -49,7 +51,7 @@ function App() {
       <ThemeProvider theme={theme}>
         {/* <Home /> */}
         {/* <SignIn /> */}
-        <UniversityManagement />
+        <CertificateRegistration />
       </ThemeProvider>
     </EthProvider>
     

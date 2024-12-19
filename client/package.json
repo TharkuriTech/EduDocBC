@@ -7,10 +7,14 @@
     "start": "webpack serve"
   },
   "dependencies": {
-    "@emotion/react": "^11.13.5",
-    "@emotion/styled": "^11.13.5",
+    "@date-io/date-fns": "^3.2.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^6.1.9",
-    "@mui/material": "^6.1.9",
+    "@mui/lab": "^6.0.0-beta.20",
+    "@mui/material": "^6.2.1",
+    "@mui/x-date-pickers": "^7.23.2",
+    "date-fns": "^2.30.0",
     "firebase": "^8.10.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
