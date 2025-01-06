@@ -128,7 +128,7 @@ const HomePage = () => {
         }}
       >
         <Typography variant="h2" style={{ fontWeight: "bold" }}>
-          Welcome to Tharkuri Tech
+          Welcome to EduDocBC
         </Typography>
         <Typography variant="h6" style={{ marginTop: "10px" }}>
           Empowering Universities with Blockchain Innovation

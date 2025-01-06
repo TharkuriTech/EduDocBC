@@ -78,7 +78,7 @@ export default function CertificateRegistration() {
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [staffList, setStaffList] = useState([]);
+  const [certificatesList, setcertificatesList] = useState([]);
     const [editMode, setEditMode] = useState(false);
     const [editId, setEditId] = useState(null);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -131,9 +131,9 @@ export default function CertificateRegistration() {
     }
   };
   const handleEdit = (id) => {
-    const staff = staffList.find((item) => item.id === id);
-    if (staff) {
-      setFormData(staff);
+    const certificates = certificatesList.find((item) => item.id === id);
+    if (certificates) {
+      setFormData(certificates);
       setEditMode(true);
       setEditId(id);
     }
@@ -148,17 +148,21 @@ export default function CertificateRegistration() {
     setDeleteDialogOpen(false);
     setDeleteId(null);
   };
+   useEffect(() => {
+      refreshData();
+    }, []);
+  
   const refreshData = async () => {
-    const snapshot = await database.ref("staff").once("value");
+    const snapshot = await database.ref("certificates").once("value");
     if (snapshot.exists()) {
       const data = snapshot.val();
-      setStaffList(Object.entries(data).map(([id, details]) => ({ id, ...details })));
+      setcertificatesList(Object.entries(data).map(([id, details]) => ({ id, ...details })));
     }
   };
   const handleDelete = async () => {
     setLoading(true);
     try {
-      await database.ref(`staff/${deleteId}`).remove();
+      await database.ref(`certificates/${deleteId}`).remove();
       refreshData();
       closeDeleteDialog();
     } catch (error) {
@@ -411,29 +415,33 @@ export default function CertificateRegistration() {
             <Table>
               <TableHead>
               <StyledTableHead>
-                  <TableCell>University</TableCell>
-                  <TableCell>Staff Name</TableCell>
-                <TableCell>Username</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Phone Number</TableCell>
-                <TableCell>Certificate Access</TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Roll No</TableCell>
+                <TableCell>University Name</TableCell>
+                <TableCell>College</TableCell>
+                <TableCell>Degree</TableCell>
+                <TableCell>Grade</TableCell>
+                <TableCell>Passedout Year</TableCell>
+                <TableCell>Authorized Person</TableCell>
                 <TableCell>Actions</TableCell>
                 </StyledTableHead>
               </TableHead>
               <TableBody>
-                {staffList.map((staff) => (
-                  <TableRow key={staff.id}>
-                    <TableCell>{staff.university}</TableCell>
-                     <TableCell>{staff.staffName}</TableCell>
-                  <TableCell>{staff.userName}</TableCell>
-                  <TableCell>{staff.email}</TableCell>
-                  <TableCell>{staff.phoneNumber}</TableCell>
-                  <TableCell>{staff.certificateAccess}</TableCell>
+                {certificatesList.map((certificates) => (
+                  <TableRow key={certificates.id}>
+                    <TableCell>{certificates.studentName}</TableCell>
+                     <TableCell>{certificates.studentNumber}</TableCell>
+                  <TableCell>{certificates.universityName}</TableCell>
+                  <TableCell>{certificates.collegeCode }</TableCell>
+                  <TableCell>{certificates.degree + " - " + certificates.stream}</TableCell>
+                  <TableCell>{certificates.grade}</TableCell>
+                  <TableCell>{certificates.year}</TableCell>
+                  <TableCell>{certificates.certificateAuthorizedPerson}</TableCell>
                     <TableCell>
-                      <IconButton color="primary" onClick={() => handleEdit(staff.id)}>
+                      <IconButton color="primary" onClick={() => handleEdit(certificates.id)}>
                         <EditIcon />
                       </IconButton>
-                      <IconButton color="error" onClick={() => openDeleteDialog(staff.id)}>
+                      <IconButton color="error" onClick={() => openDeleteDialog(certificates.id)}>
                         <DeleteIcon />
                       </IconButton>
                     </TableCell>
