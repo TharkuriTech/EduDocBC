@@ -51,7 +51,7 @@ function App() {
       <ThemeProvider theme={theme}>
         {/* <Home /> */}
         {/* <SignIn /> */}
-        <CertificateRegistration />
+        <UniversityManagement />
       </ThemeProvider>
     </EthProvider>
     
