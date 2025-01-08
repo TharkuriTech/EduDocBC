@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,  useContext } from "react";
 import {
   Box,
   Button,
@@ -29,6 +29,8 @@ import { styled } from "@mui/material/styles";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import database from "../firebase";
+import EthContext from "../contexts/EthContext/EthContext";
+import { CreateUniversity } from "../content/js/BlockchainIntraction";
 
 const StyledCard = styled(Box)(({ theme }) => ({
   backgroundColor: "#fff",
@@ -63,6 +65,9 @@ const StyledTableHead = styled(TableRow)(({ theme }) => ({
   },
 }));
 export default function UniversityRegistrationForm() {
+  const { state } = useContext(EthContext);
+  const { web3, accounts, networkID, contract } = state;
+
   const [formData, setFormData] = useState({
     universityName: "",
     UniversityCode: "",
@@ -72,6 +77,10 @@ export default function UniversityRegistrationForm() {
     IsActive: "no",
   });
 
+  const [Uweb3, setweb3] = useState(web3);
+  const [Uaccounts, setaccounts] = useState(accounts);
+  const [UnetworkID, setnetworkID] = useState(networkID);
+  const [Ucontract, setcontract] = useState(contract);
   const [errors, setErrors] = useState({});
   const [UniversityList, setUniversityList] = useState([]);
   const [editMode, setEditMode] = useState(false);
@@ -88,7 +97,9 @@ export default function UniversityRegistrationForm() {
     const snapshot = await database.ref("University").once("value");
     if (snapshot.exists()) {
       const data = snapshot.val();
-      setUniversityList(Object.entries(data).map(([id, details]) => ({ id, ...details })));
+      setUniversityList(
+        Object.entries(data).map(([id, details]) => ({ id, ...details }))
+      );
     }
   };
 
@@ -126,9 +137,30 @@ export default function UniversityRegistrationForm() {
       try {
         if (editMode) {
           await database.ref(`University/${editId}`).update(formData);
+          if(formData.IsActive)
+          {
+            var param = {
+              UCode : formData.UniversityCode,
+              UName : formData.userName,
+              Password : formData.password,
+              Address : formData.Address,
+            }
+            CreateUniversity(param,contract,accounts);
+          }
+         
         } else {
           const newRef = database.ref("University").push();
           await newRef.set(formData);
+          if(formData.IsActive)
+            {
+              var param = {
+                UCode : formData.UniversityCode,
+                UName : formData.userName,
+                Password : formData.password,
+                Address : formData.Address,
+              }
+              CreateUniversity(param,contract,accounts);
+            }
         }
         handleClear();
         setEditMode(false);
@@ -273,7 +305,7 @@ export default function UniversityRegistrationForm() {
                 />
               </FormControl>
             </Grid>
-            
+
             <Grid item xs={12}>
               <FormLabel>Active</FormLabel>
               <RadioGroup
@@ -298,7 +330,11 @@ export default function UniversityRegistrationForm() {
             <StyledButton variant="contained" color="primary" type="submit">
               {loading ? <CircularProgress size={24} /> : "Submit"}
             </StyledButton>
-            <StyledButton variant="outlined" color="secondary" onClick={handleClear}>
+            <StyledButton
+              variant="outlined"
+              color="secondary"
+              onClick={handleClear}
+            >
               Clear
             </StyledButton>
           </Box>
@@ -308,28 +344,34 @@ export default function UniversityRegistrationForm() {
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
-              <StyledTableHead>
+                <StyledTableHead>
                   <TableCell>University Name</TableCell>
                   <TableCell>University Code</TableCell>
-                <TableCell>Username</TableCell>
-                <TableCell>Address</TableCell>
-                <TableCell>Active</TableCell>
-                <TableCell>Actions</TableCell>
+                  <TableCell>Username</TableCell>
+                  <TableCell>Address</TableCell>
+                  <TableCell>Active</TableCell>
+                  <TableCell>Actions</TableCell>
                 </StyledTableHead>
               </TableHead>
               <TableBody>
                 {UniversityList.map((University) => (
                   <TableRow key={University.id}>
                     <TableCell>{University.universityName}</TableCell>
-                     <TableCell>{University.UniversityCode}</TableCell>
-                  <TableCell>{University.userName}</TableCell>
-                  <TableCell>{University.Address}</TableCell>
-                  <TableCell>{University.IsActive}</TableCell>
+                    <TableCell>{University.UniversityCode}</TableCell>
+                    <TableCell>{University.userName}</TableCell>
+                    <TableCell>{University.Address}</TableCell>
+                    <TableCell>{University.IsActive}</TableCell>
                     <TableCell>
-                      <IconButton color="primary" onClick={() => handleEdit(University.id)}>
+                      <IconButton
+                        color="primary"
+                        onClick={() => handleEdit(University.id)}
+                      >
                         <EditIcon />
                       </IconButton>
-                      <IconButton color="error" onClick={() => openDeleteDialog(University.id)}>
+                      <IconButton
+                        color="error"
+                        onClick={() => openDeleteDialog(University.id)}
+                      >
                         <DeleteIcon />
                       </IconButton>
                     </TableCell>
@@ -345,7 +387,8 @@ export default function UniversityRegistrationForm() {
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete this University record? This action cannot be undone.
+            Are you sure you want to delete this University record? This action
+            cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

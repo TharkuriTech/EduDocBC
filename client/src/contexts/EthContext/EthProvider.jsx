@@ -3,7 +3,7 @@ import Web3 from "web3";
 import EthContext from "./EthContext";
 import { reducer, actions, initialState } from "./state";
 
-function EthProvider({ children }) {
+function EthProvider({ children })  {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const init = useCallback(
@@ -30,7 +30,7 @@ function EthProvider({ children }) {
   useEffect(() => {
     const tryInit = async () => {
       try {
-        const artifact = require("../../contracts/SimpleStorage.json");
+        const artifact = require("../../contracts/StudentCertificate.json");
         init(artifact);
       } catch (err) {
         console.error(err);

@@ -29,6 +29,7 @@ import { styled } from "@mui/material/styles";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import database from "../firebase";
+import { actions, initialState, reducer } from "../contexts/EthContext/state";
 
 const StyledCard = styled(Box)(({ theme }) => ({
   backgroundColor: "#fff",
@@ -62,7 +63,7 @@ const StyledTableHead = styled(TableRow)(({ theme }) => ({
     padding: theme.spacing(1.5),
   },
 }));
-export default function StaffRegistrationForm() {
+export default function StaffRegistrationForm(Ethdata) {
   const [formData, setFormData] = useState({
     university: "",
     staffName: "",
@@ -376,3 +377,13 @@ export default function StaffRegistrationForm() {
     </Box>
   );
 }
+
+
+// const mapStateToProps = (state) => ({
+//   Ethdata: state,
+// });
+// const mapDispatchToProps = (dispatch) => ({
+//   initializeEthContext: (data) =>
+//     dispatch({ type: actions.updatePage, data:{ data}  }),
+// });
+// export default connect(mapStateToProps)(StaffRegistrationForm);
