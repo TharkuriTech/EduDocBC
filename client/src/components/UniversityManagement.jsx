@@ -1,4 +1,4 @@
-import React, { useState, useEffect,  useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Box,
   Button,
@@ -21,6 +21,7 @@ import {
   TableHead,
   TableRow,
   Paper,
+  TablePagination,
 } from "@mui/material";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -30,7 +31,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import database from "../firebase";
 import EthContext from "../contexts/EthContext/EthContext";
-import { CreateUniversity } from "../content/js/BlockchainIntraction";
+import { CreateUniversity, UpdateUniversity } from "../content/js/BlockchainIntraction";
 
 const StyledCard = styled(Box)(({ theme }) => ({
   backgroundColor: "#fff",
@@ -43,18 +44,21 @@ const StyledCard = styled(Box)(({ theme }) => ({
     width: "95%",
   },
 }));
+
 const StyledTextField = styled(TextField)(({ theme }) => ({
   "& .MuiInputBase-root": {
     fontSize: "14px",
     height: "40px",
   },
 }));
+
 const StyledButton = styled(Button)(({ theme }) => ({
   fontSize: "14px",
   height: "40px",
   padding: "0 20px",
   borderRadius: "6px",
 }));
+
 const StyledTableHead = styled(TableRow)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
   "& th": {
@@ -64,6 +68,7 @@ const StyledTableHead = styled(TableRow)(({ theme }) => ({
     padding: theme.spacing(1.5),
   },
 }));
+
 export default function UniversityRegistrationForm() {
   const { state } = useContext(EthContext);
   const { web3, accounts, networkID, contract } = state;
@@ -88,6 +93,8 @@ export default function UniversityRegistrationForm() {
   const [loading, setLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [page, setPage] = useState(0); // State for pagination
+  const [rowsPerPage, setRowsPerPage] = useState(10); // Rows per page
 
   useEffect(() => {
     refreshData();
@@ -137,30 +144,27 @@ export default function UniversityRegistrationForm() {
       try {
         if (editMode) {
           await database.ref(`University/${editId}`).update(formData);
-          if(formData.IsActive)
-          {
-            var param = {
-              UCode : formData.UniversityCode,
-              UName : formData.userName,
-              Password : formData.password,
-              Address : formData.Address,
-            }
-            CreateUniversity(param,contract,accounts);
-          }
-         
+
+          const param = {
+            UCode: formData.UniversityCode,
+            UName: formData.userName,
+            Password: formData.password,
+            Address: formData.Address,
+            isremove: formData.IsActive === "yes",
+          };
+          UpdateUniversity(param, contract, accounts);
         } else {
           const newRef = database.ref("University").push();
           await newRef.set(formData);
-          if(formData.IsActive)
-            {
-              var param = {
-                UCode : formData.UniversityCode,
-                UName : formData.userName,
-                Password : formData.password,
-                Address : formData.Address,
-              }
-              CreateUniversity(param,contract,accounts);
-            }
+          if (formData.IsActive) {
+            const param = {
+              UCode: formData.UniversityCode,
+              UName: formData.userName,
+              Password: formData.password,
+              Address: formData.Address,
+            };
+            CreateUniversity(param, contract, accounts);
+          }
         }
         handleClear();
         setEditMode(false);
@@ -175,12 +179,12 @@ export default function UniversityRegistrationForm() {
 
   const handleClear = () => {
     setFormData({
-      university: "",
-      UniversityName: "",
+      universityName: "",
+      UniversityCode: "",
       userName: "",
       password: "",
-      phoneNumber: "",
-      certificateAccess: "no",
+      Address: "",
+      IsActive: "no",
     });
     setErrors({});
   };
@@ -215,6 +219,21 @@ export default function UniversityRegistrationForm() {
     }
     setLoading(false);
   };
+
+  // Handle pagination
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const displayedRows = UniversityList.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
 
   return (
     <Box
@@ -306,7 +325,7 @@ export default function UniversityRegistrationForm() {
               </FormControl>
             </Grid>
 
-            <Grid item xs={12}>
+            <Grid item xs={12} sm={4}>
               <FormLabel>Active</FormLabel>
               <RadioGroup
                 row
@@ -341,21 +360,21 @@ export default function UniversityRegistrationForm() {
         </form>
 
         <Box sx={{ marginTop: 4 }}>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
+          <TableContainer component={Paper} style={{ maxHeight: "300px" }}>
+            <Table stickyHeader>
+            <TableHead stickyHeader >
                 <StyledTableHead>
-                  <TableCell>University Name</TableCell>
-                  <TableCell>University Code</TableCell>
-                  <TableCell>Username</TableCell>
-                  <TableCell>Address</TableCell>
-                  <TableCell>Active</TableCell>
-                  <TableCell>Actions</TableCell>
+                  <TableCell style={{background:"#1976d2"}}>University Name</TableCell>
+                  <TableCell style={{background:"#1976d2"}}>University Code</TableCell>
+                  <TableCell style={{background:"#1976d2"}}>Username</TableCell>
+                  <TableCell style={{background:"#1976d2"}}>Address</TableCell>
+                  <TableCell style={{background:"#1976d2"}}>Active</TableCell>
+                  <TableCell style={{background:"#1976d2"}}>Actions</TableCell>
                 </StyledTableHead>
               </TableHead>
               <TableBody>
-                {UniversityList.map((University) => (
-                  <TableRow key={University.id}>
+                {displayedRows.map((University) => (
+                  <TableRow key={University.id} >
                     <TableCell>{University.universityName}</TableCell>
                     <TableCell>{University.UniversityCode}</TableCell>
                     <TableCell>{University.userName}</TableCell>
@@ -380,6 +399,16 @@ export default function UniversityRegistrationForm() {
               </TableBody>
             </Table>
           </TableContainer>
+
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 15]}
+            component="div"
+            count={UniversityList.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
         </Box>
       </StyledCard>
 

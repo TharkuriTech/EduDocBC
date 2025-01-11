@@ -34,6 +34,7 @@ contract StudentCertificate {
     mapping(bytes => CertificateDetails) private Certificates;
     mapping(bytes => StaffDetails[]) private StaffCredentials;
     mapping(bytes => UniversityDetails) private UniversityCredentials;
+    bytes[] private universityCodes;
 
     constructor() {
         Owner = msg.sender;
@@ -119,6 +120,7 @@ contract StudentCertificate {
         status = true;
         Message = "Successfully updated";
     }
+    
 
     function StaffRegistration(
         string memory UCode,
@@ -172,6 +174,22 @@ contract StudentCertificate {
         status = true;
         Message = "Successfully updated";
     }
+
+    function getAllUniversityCredentials() 
+    public 
+    view 
+    returns (UniversityDetails[] memory) 
+{
+    uint256 length = universityCodes.length;
+    UniversityDetails[] memory allUniversities = new UniversityDetails[](length);
+    
+    for (uint256 i = 0; i < length; i++) {
+        allUniversities[i] = UniversityCredentials[universityCodes[i]];
+    }
+    
+    return allUniversities;
+}
+
 
     function CreateCertificate(
         string memory userName,
