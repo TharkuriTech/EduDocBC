@@ -31,7 +31,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import database from "../firebase";
 import EthContext from "../contexts/EthContext/EthContext";
-import { CreateUniversity, UpdateUniversity } from "../content/js/BlockchainIntraction";
+import { CreateUniversity, UpdateUniversity,GetAllUniversities } from "../content/js/BlockchainIntraction";
 
 const StyledCard = styled(Box)(({ theme }) => ({
   backgroundColor: "#fff",
@@ -96,8 +96,16 @@ export default function UniversityRegistrationForm() {
   const [page, setPage] = useState(0); // State for pagination
   const [rowsPerPage, setRowsPerPage] = useState(10); // Rows per page
 
+  if(contract != null)
+  {
+    const data = GetAllUniversities(contract);
+    console.log(data);
+  }
+
   useEffect(() => {
     refreshData();
+
+
   }, []);
 
   const refreshData = async () => {

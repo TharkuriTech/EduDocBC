@@ -19,8 +19,8 @@ contract StudentCertificate {
         bytes StudentName;
         bytes DOB;
         bytes FatherName;
-        bytes UniversityCode; //UniversityName to be get from web2 database
-        bytes CollegeCode; //CollegeName to be get from web2 database
+        bytes UniversityCode; 
+        bytes CollegeCode; 
         bytes Degree;
         bytes Stream;
         bytes Grade;
@@ -36,10 +36,18 @@ contract StudentCertificate {
     mapping(bytes => UniversityDetails) private UniversityCredentials;
     bytes[] private universityCodes;
 
+
+//Event Area
+event StaffRegistered(bool status, string message, UniversityDetails[] data);
+
+
     constructor() {
         Owner = msg.sender;
     }
 
+
+
+// ********************** Modifers ****************************************
     modifier isOwner(address add) {
         require(Owner == add, "you don't have access to proceed further");
         _;
@@ -86,12 +94,15 @@ contract StudentCertificate {
         _;
     }
 
+
+    //*********************************functions*************** */
+
     function UniversityRegistration(
         string memory UCode,
         string memory UName,
         string memory Password,
         address _add
-    ) public isOwner(msg.sender) returns (bool status, bytes memory Message) {
+    ) public isOwner(msg.sender) returns (bool status, bytes memory Message,UniversityDetails[] memory data) {
         UniversityDetails memory UD;
         UD.UserName = bytes(UName);
         UD.Password = bytes(Password);
@@ -99,6 +110,9 @@ contract StudentCertificate {
         UniversityCredentials[bytes(UCode)] = UD;
         status = true;
         Message = "Successfully inserted";
+        universityCodes.push(bytes(UCode));
+        data= getAllUniversityCredentials();
+        emit StaffRegistered(status, string(Message), data);
     }
 
     function UpdateUniversityDetails(
@@ -139,6 +153,7 @@ contract StudentCertificate {
         StaffCredentials[bytes(UCode)].push(SD);
         status = true;
         Message = "Successfully inserted";
+
     }
 
     function UpdateStaffDetails(
