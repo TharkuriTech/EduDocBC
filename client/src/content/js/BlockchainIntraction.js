@@ -43,7 +43,6 @@ export async function UpdateUniversity(param, contract, accounts) {
 }
 // Function to fetch all university credentials
 export async function GetAllUniversities(contract) {
-  debugger;
   try {
     const allUniversities = await contract.methods.getAllUniversityCredentials().call();
     console.log("All Universities:", allUniversities);

@@ -29,7 +29,6 @@ import { styled } from "@mui/material/styles";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import database from "../firebase";
-import { actions, initialState, reducer } from "../contexts/EthContext/state";
 
 const StyledCard = styled(Box)(({ theme }) => ({
   backgroundColor: "#fff",

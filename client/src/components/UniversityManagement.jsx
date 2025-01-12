@@ -82,10 +82,7 @@ export default function UniversityRegistrationForm() {
     IsActive: "no",
   });
 
-  const [Uweb3, setweb3] = useState(web3);
-  const [Uaccounts, setaccounts] = useState(accounts);
-  const [UnetworkID, setnetworkID] = useState(networkID);
-  const [Ucontract, setcontract] = useState(contract);
+
   const [errors, setErrors] = useState({});
   const [UniversityList, setUniversityList] = useState([]);
   const [editMode, setEditMode] = useState(false);
@@ -95,10 +92,11 @@ export default function UniversityRegistrationForm() {
   const [deleteId, setDeleteId] = useState(null);
   const [page, setPage] = useState(0); // State for pagination
   const [rowsPerPage, setRowsPerPage] = useState(10); // Rows per page
+  let data = null;
 
-  if(contract != null)
+  if(contract != null && data == null)
   {
-    const data = GetAllUniversities(contract);
+    data = GetAllUniversities(contract);
     console.log(data);
   }
 
