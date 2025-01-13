@@ -1,6 +1,6 @@
 // import {fireAlert} from './app';
 import Swal from "sweetalert2";
-const Web3 = require('web3');
+const Web3 = require("web3");
 const web3 = new Web3();
 const decodeBytes = (bytes) => web3.utils.hexToUtf8(bytes);
 
@@ -16,9 +16,14 @@ export async function CreateUniversity(param, contract, accounts) {
       .send({ from: accounts[0] });
     if (Result.status) {
       fireAlert("University created successfully", "success");
-    } else fireAlert("Unable to save data", "error");
+      return true;
+    } else {
+      fireAlert("Unable to save data", "error");
+      return false;
+    }
   } catch (error) {
     handleError(error);
+    return false;
   }
 }
 export async function UpdateUniversity(param, contract, accounts) {
@@ -34,15 +39,22 @@ export async function UpdateUniversity(param, contract, accounts) {
       .send({ from: accounts[0] });
     if (Result.status) {
       fireAlert("University updated successfully", "success");
-    } else fireAlert("Unable to update data", "error");
+      return true;
+    } else {
+      fireAlert("Unable to update data", "error");
+      return false;
+    }
   } catch (error) {
     handleError(error);
+    return false;
   }
 }
 // Function to fetch all university credentials
 export async function GetAllUniversities(contract) {
   try {
-    const allUniversities = await contract.methods.getAllUniversityCredentials().call();
+    const allUniversities = await contract.methods
+      .getAllUniversityCredentials()
+      .call();
     console.log("All Universities:", allUniversities);
     return allUniversities; // Return the fetched data
   } catch (error) {

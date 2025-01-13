@@ -30,6 +30,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import database from "../firebase";
 import {StyledCard,StyledButton,StyledTableHead,StyledTextField} from '../content/js/style'
+import {fireAlert} from '../content/js/app';
 
 
 
@@ -348,12 +349,3 @@ export default function StaffRegistrationForm(Ethdata) {
   );
 }
 
-
-// const mapStateToProps = (state) => ({
-//   Ethdata: state,
-// });
-// const mapDispatchToProps = (dispatch) => ({
-//   initializeEthContext: (data) =>
-//     dispatch({ type: actions.updatePage, data:{ data}  }),
-// });
-// export default connect(mapStateToProps)(StaffRegistrationForm);

@@ -30,12 +30,22 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import database from "../firebase";
 import EthContext from "../contexts/EthContext/EthContext";
-import { CreateUniversity, UpdateUniversity,GetAllUniversities } from "../content/js/BlockchainIntraction";
-import {StyledCard,StyledButton,StyledTableHead,StyledTextField} from '../content/js/style'
+import {
+  CreateUniversity,
+  UpdateUniversity,
+  GetAllUniversities,
+} from "../content/js/BlockchainIntraction";
+import {
+  StyledCard,
+  StyledButton,
+  StyledTableHead,
+  StyledTextField,
+} from "../content/js/style";
+import fireAlert from "../content/js/app";
 
-export default    function UniversityRegistrationForm() {
+export default function UniversityRegistrationForm() {
   const { state } = useContext(EthContext);
-  const { web3, accounts, networkID, contract } = state;
+  const { accounts, contract } = state;
 
   const [formData, setFormData] = useState({
     universityName: "",
@@ -46,7 +56,6 @@ export default    function UniversityRegistrationForm() {
     IsActive: "no",
   });
 
-
   const [errors, setErrors] = useState({});
   const [UniversityList, setUniversityList] = useState([]);
   const [editMode, setEditMode] = useState(false);
@@ -54,22 +63,19 @@ export default    function UniversityRegistrationForm() {
   const [loading, setLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
-  const [page, setPage] = useState(0); // State for pagination
-  const [rowsPerPage, setRowsPerPage] = useState(10); // Rows per page
-  const [Unversitydata, setUnversitydata] = useState([]); // Rows per page
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [Unversitydata, setUnversitydata] = useState([]);
   let GetInitiated = 0;
 
-  if(contract != null && Unversitydata.length == 0 && GetInitiated == 0)
-  {
-    GetInitiated = 1;
-    setUnversitydata(GetAllUniversities(contract));
-    console.log(Unversitydata);
-  }
+  // if (contract != null && Unversitydata.length == 0 && GetInitiated == 0) {
+  //   GetInitiated = 1;
+  //   setUnversitydata(GetAllUniversities(contract));
+  //   console.log(Unversitydata);
+  // }
 
   useEffect(() => {
     refreshData();
-
-
   }, []);
 
   const refreshData = async () => {
@@ -97,20 +103,28 @@ export default    function UniversityRegistrationForm() {
   const validateForm = () => {
     const newErrors = {};
     let isValid = true;
-
+    const solidityAddressPattern = /^0x[a-fA-F0-9]{40}$/;
     Object.entries(formData).forEach(([key, value]) => {
       if (value.trim() === "" && key !== "certificateAccess") {
         newErrors[key] = true;
         isValid = false;
+      } else if (
+        key == "Address" &&
+        value.trim() != "" &&
+        !solidityAddressPattern.test(value.trim())
+      ) {
+        newErrors[key] = true;
+        newErrors["Message"] = "Invalid Address format.";
+        isValid = false;
       }
     });
-
     setErrors(newErrors);
     return isValid;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (validateForm()) {
       setLoading(true);
       try {
@@ -120,22 +134,45 @@ export default    function UniversityRegistrationForm() {
             UName: formData.userName,
             Password: formData.password,
             Address: formData.Address,
-            isremove: formData.IsActive === "yes",
+            isremove: formData.IsActive !== "yes",
+          };
+          var result = await UpdateUniversity(param, contract, accounts);
+          if (result || formData.IsActive != "yes") {
+            await database.ref(`University/${editId}`).update(formData);
           }
-          await UpdateUniversity(param, contract, accounts);
-          await database.ref(`University/${editId}`).update(formData);
         } else {
-          
-          if (formData.IsActive) {
+          // validation
+          const snapshot = await database.ref("University").once("value");
+          if (snapshot.exists()) {
+            const universities = Object.values(snapshot.val());
+            const isDuplicate = universities.some(
+              (university) =>
+                university.UniversityCode === formData.UniversityCode ||
+                university.Address === formData.Address
+            );
+
+            if (isDuplicate) {
+              setLoading(false);
+              fireAlert(
+                "Duplicate entry: University code or address already exists.",
+                "error"
+              );
+              return;
+            }
+          }
+          var result = false;
+          if (formData.IsActive == "yes") {
             const param = {
               UCode: formData.UniversityCode,
               UName: formData.userName,
               Password: formData.password,
               Address: formData.Address,
             };
-          await CreateUniversity(param, contract, accounts);
-          const newRef = database.ref("University").push();
-          await newRef.set(formData);
+            result = await CreateUniversity(param, contract, accounts);
+          }
+          if (result || formData.IsActive != "yes") {
+            const newRef = database.ref("University").push();
+            await newRef.set(formData);
           }
         }
         handleClear();
@@ -171,6 +208,12 @@ export default    function UniversityRegistrationForm() {
   };
 
   const openDeleteDialog = (id) => {
+    const University = UniversityList.find((item) => item.id === id);
+    formData.Address = University.Address;
+    formData.IsActive = false;
+    formData.UniversityCode = University.UniversityCode;
+    formData.userName = University.userName;
+    formData.password = University.password;
     setDeleteDialogOpen(true);
     setDeleteId(id);
   };
@@ -183,9 +226,21 @@ export default    function UniversityRegistrationForm() {
   const handleDelete = async () => {
     setLoading(true);
     try {
-      await database.ref(`University/${deleteId}`).remove();
-      refreshData();
-      closeDeleteDialog();
+      const param = {
+        UCode: formData.UniversityCode,
+        UName: formData.userName,
+        Password: formData.password,
+        Address: formData.Address,
+        isremove: true,
+      };
+      var result = await UpdateUniversity(param, contract, accounts);
+      if (result) {
+        await database.ref(`University/${deleteId}`).remove();
+        refreshData();
+        closeDeleteDialog();
+      } else {
+        closeDeleteDialog();
+      }
     } catch (error) {
       console.error("Error deleting record:", error);
     }
@@ -291,7 +346,13 @@ export default    function UniversityRegistrationForm() {
                   value={formData.Address}
                   onChange={handleChange}
                   error={!!errors.Address}
-                  helperText={errors.Address ? "Required" : ""}
+                  helperText={
+                    errors.Address
+                      ? errors["Message"] != undefined
+                        ? errors["Message"]
+                        : "Required"
+                      : ""
+                  }
                   placeholder="Enter Address"
                 />
               </FormControl>
@@ -334,24 +395,42 @@ export default    function UniversityRegistrationForm() {
         <Box sx={{ marginTop: 4 }}>
           <TableContainer component={Paper} style={{ maxHeight: "300px" }}>
             <Table stickyHeader>
-            <TableHead stickyHeader >
+              <TableHead stickyHeader>
                 <StyledTableHead>
-                  <TableCell style={{background:"#1976d2"}}>University Name</TableCell>
-                  <TableCell style={{background:"#1976d2"}}>University Code</TableCell>
-                  <TableCell style={{background:"#1976d2"}}>Username</TableCell>
-                  <TableCell style={{background:"#1976d2"}}>Address</TableCell>
-                  <TableCell style={{background:"#1976d2"}}>Active</TableCell>
-                  <TableCell style={{background:"#1976d2"}}>Actions</TableCell>
+                  <TableCell style={{ background: "#1976d2" }}>
+                    University Name
+                  </TableCell>
+                  <TableCell style={{ background: "#1976d2" }}>
+                    University Code
+                  </TableCell>
+                  <TableCell style={{ background: "#1976d2" }}>
+                    Username
+                  </TableCell>
+                  <TableCell style={{ background: "#1976d2" }}>
+                    Address
+                  </TableCell>
+                  <TableCell style={{ background: "#1976d2" }}>
+                    Active
+                  </TableCell>
+                  <TableCell style={{ background: "#1976d2" }}>
+                    Actions
+                  </TableCell>
                 </StyledTableHead>
               </TableHead>
               <TableBody>
                 {displayedRows.map((University) => (
-                  <TableRow key={University.id} >
+                  <TableRow key={University.id}>
                     <TableCell>{University.universityName}</TableCell>
                     <TableCell>{University.UniversityCode}</TableCell>
                     <TableCell>{University.userName}</TableCell>
-                    <TableCell id={University.Address}>{University.Address}<br></br>{Unversitydata != null && Unversitydata.length >0 ? Unversitydata[0].Add : ""}</TableCell>
-                    <TableCell >{University.IsActive}</TableCell>
+                    <TableCell id={University.Address}>
+                      {University.Address}
+                      <br></br>
+                      {Unversitydata != null && Unversitydata.length > 0
+                        ? Unversitydata[0].Add
+                        : ""}
+                    </TableCell>
+                    <TableCell>{University.IsActive}</TableCell>
                     <TableCell>
                       <IconButton
                         color="primary"
