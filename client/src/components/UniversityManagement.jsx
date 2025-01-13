@@ -26,50 +26,14 @@ import {
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
-import { styled } from "@mui/material/styles";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import database from "../firebase";
 import EthContext from "../contexts/EthContext/EthContext";
 import { CreateUniversity, UpdateUniversity,GetAllUniversities } from "../content/js/BlockchainIntraction";
+import {StyledCard,StyledButton,StyledTableHead,StyledTextField} from '../content/js/style'
 
-const StyledCard = styled(Box)(({ theme }) => ({
-  backgroundColor: "#fff",
-  padding: theme.spacing(4),
-  borderRadius: "8px",
-  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-  maxWidth: "90%",
-  margin: "auto",
-  [theme.breakpoints.down("sm")]: {
-    width: "95%",
-  },
-}));
-
-const StyledTextField = styled(TextField)(({ theme }) => ({
-  "& .MuiInputBase-root": {
-    fontSize: "14px",
-    height: "40px",
-  },
-}));
-
-const StyledButton = styled(Button)(({ theme }) => ({
-  fontSize: "14px",
-  height: "40px",
-  padding: "0 20px",
-  borderRadius: "6px",
-}));
-
-const StyledTableHead = styled(TableRow)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.main,
-  "& th": {
-    color: theme.palette.common.white,
-    fontWeight: "bold",
-    textAlign: "center",
-    padding: theme.spacing(1.5),
-  },
-}));
-
-export default function UniversityRegistrationForm() {
+export default    function UniversityRegistrationForm() {
   const { state } = useContext(EthContext);
   const { web3, accounts, networkID, contract } = state;
 
@@ -92,12 +56,14 @@ export default function UniversityRegistrationForm() {
   const [deleteId, setDeleteId] = useState(null);
   const [page, setPage] = useState(0); // State for pagination
   const [rowsPerPage, setRowsPerPage] = useState(10); // Rows per page
-  let data = null;
+  const [Unversitydata, setUnversitydata] = useState([]); // Rows per page
+  let GetInitiated = 0;
 
-  if(contract != null && data == null)
+  if(contract != null && Unversitydata.length == 0 && GetInitiated == 0)
   {
-    data = GetAllUniversities(contract);
-    console.log(data);
+    GetInitiated = 1;
+    setUnversitydata(GetAllUniversities(contract));
+    console.log(Unversitydata);
   }
 
   useEffect(() => {
@@ -149,19 +115,17 @@ export default function UniversityRegistrationForm() {
       setLoading(true);
       try {
         if (editMode) {
-          await database.ref(`University/${editId}`).update(formData);
-
           const param = {
             UCode: formData.UniversityCode,
             UName: formData.userName,
             Password: formData.password,
             Address: formData.Address,
             isremove: formData.IsActive === "yes",
-          };
-          UpdateUniversity(param, contract, accounts);
+          }
+          await UpdateUniversity(param, contract, accounts);
+          await database.ref(`University/${editId}`).update(formData);
         } else {
-          const newRef = database.ref("University").push();
-          await newRef.set(formData);
+          
           if (formData.IsActive) {
             const param = {
               UCode: formData.UniversityCode,
@@ -169,7 +133,9 @@ export default function UniversityRegistrationForm() {
               Password: formData.password,
               Address: formData.Address,
             };
-            CreateUniversity(param, contract, accounts);
+          await CreateUniversity(param, contract, accounts);
+          const newRef = database.ref("University").push();
+          await newRef.set(formData);
           }
         }
         handleClear();
@@ -384,8 +350,8 @@ export default function UniversityRegistrationForm() {
                     <TableCell>{University.universityName}</TableCell>
                     <TableCell>{University.UniversityCode}</TableCell>
                     <TableCell>{University.userName}</TableCell>
-                    <TableCell>{University.Address}</TableCell>
-                    <TableCell>{University.IsActive}</TableCell>
+                    <TableCell id={University.Address}>{University.Address}<br></br>{Unversitydata != null && Unversitydata.length >0 ? Unversitydata[0].Add : ""}</TableCell>
+                    <TableCell >{University.IsActive}</TableCell>
                     <TableCell>
                       <IconButton
                         color="primary"

@@ -5,7 +5,6 @@ const web3 = new Web3();
 const decodeBytes = (bytes) => web3.utils.hexToUtf8(bytes);
 
 export async function CreateUniversity(param, contract, accounts) {
-  debugger;
   try {
     const Result = await contract.methods
       .UniversityRegistration(
@@ -23,7 +22,6 @@ export async function CreateUniversity(param, contract, accounts) {
   }
 }
 export async function UpdateUniversity(param, contract, accounts) {
-  debugger;
   try {
     const Result = await contract.methods
       .UpdateUniversityDetails(

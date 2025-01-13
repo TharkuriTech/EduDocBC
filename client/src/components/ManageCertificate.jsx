@@ -25,35 +25,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import database from "../firebase";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-
-const StyledCard = styled(Box)(({ theme }) => ({
-  backgroundColor: "#fff",
-  padding: theme.spacing(4),
-  borderRadius: "8px",
-  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-  maxWidth: "90%",
-  margin: "auto",
-  [theme.breakpoints.down("sm")]: {
-    width: "95%",
-  },
-}));
-
-const StyledButton = styled(Button)(({ theme }) => ({
-  fontSize: "14px",
-  height: "40px",
-  padding: "0 20px",
-  borderRadius: "6px",
-}));
-
-  const StyledTableHead = styled(TableRow)(({ theme }) => ({
-    backgroundColor: theme.palette.primary.main,
-    "& th": {
-      color: theme.palette.common.white,
-      fontWeight: "bold",
-      textAlign: "center",
-      padding: theme.spacing(1.5),
-    },
-  }));
+import {StyledCard,StyledButton,StyledTableHead} from '../content/js/style'
 export default function CertificateRegistration() {
   const [formData, setFormData] = useState({
     studentName: "",

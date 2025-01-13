@@ -10,7 +10,6 @@ import firebase from 'firebase';
 //   appId: process.env.FIREBASE_APP_ID,
 //   databaseURL: process.env.REACT_APP_FIREBASE_DATABASE_URL,
 // };
-debugger
 const firebaseConfig = {
   databaseURL: 'https://edudocbc-default-rtdb.firebaseio.com/',
 };

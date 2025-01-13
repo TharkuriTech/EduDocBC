@@ -29,39 +29,10 @@ import { styled } from "@mui/material/styles";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import database from "../firebase";
+import {StyledCard,StyledButton,StyledTableHead,StyledTextField} from '../content/js/style'
 
-const StyledCard = styled(Box)(({ theme }) => ({
-  backgroundColor: "#fff",
-  padding: theme.spacing(4),
-  borderRadius: "8px",
-  boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-  maxWidth: "90%",
-  margin: "auto",
-  [theme.breakpoints.down("sm")]: {
-    width: "95%",
-  },
-}));
-const StyledTextField = styled(TextField)(({ theme }) => ({
-  "& .MuiInputBase-root": {
-    fontSize: "14px",
-    height: "40px",
-  },
-}));
-const StyledButton = styled(Button)(({ theme }) => ({
-  fontSize: "14px",
-  height: "40px",
-  padding: "0 20px",
-  borderRadius: "6px",
-}));
-const StyledTableHead = styled(TableRow)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.main,
-  "& th": {
-    color: theme.palette.common.white,
-    fontWeight: "bold",
-    textAlign: "center",
-    padding: theme.spacing(1.5),
-  },
-}));
+
+
 export default function StaffRegistrationForm(Ethdata) {
   const [formData, setFormData] = useState({
     university: "",
