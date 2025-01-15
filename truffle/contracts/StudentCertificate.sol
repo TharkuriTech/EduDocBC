@@ -4,18 +4,8 @@ pragma solidity >=0.4.22 <0.9.0;
 contract StudentCertificate {
     address public Owner;
 
-    struct UniversityDetails {
-        bytes UserName;
-        bytes Password;
-        address Add;
-    }
-    struct StaffDetails {
-        bytes UserName;
-        bytes Password;
-        address Add;
-    }
-
     struct CertificateDetails {
+        bytes UCode;
         bytes StudentName;
         bytes DOB;
         bytes FatherName;
@@ -30,22 +20,11 @@ contract StudentCertificate {
         bytes CertificateAuthorizedPerson;
         bytes IssuedDate;
     }
-
     mapping(bytes => CertificateDetails) private Certificates;
-    mapping(bytes => StaffDetails[]) private StaffCredentials;
-    mapping(bytes => UniversityDetails) private UniversityCredentials;
-    bytes[] private universityCodes;
-
-
-//Event Area
-event StaffRegistered(bool status, string message, UniversityDetails[] data);
-
-
+ 
     constructor() {
         Owner = msg.sender;
     }
-
-
 
 // ********************** Modifers ****************************************
     modifier isOwner(address add) {
@@ -53,166 +32,14 @@ event StaffRegistered(bool status, string message, UniversityDetails[] data);
         _;
     }
 
-    modifier isUniversityAccess(
-        string memory UCode,
-        string memory userName,
-        string memory Password,
-        address add
-    ) {
-        UniversityDetails storage university = UniversityCredentials[bytes(UCode)];
+  
 
-        require(
-            keccak256(university.UserName) == keccak256(bytes(userName)) &&
-            keccak256(university.Password) == keccak256(bytes(Password)) &&
-            university.Add == add,
-            "you are not authorized"
-        );
-        _;
-    }
-
-    modifier isStaffAccess(
-        string memory UCode,
-        string memory userName,
-        string memory Password
-    ) {
-        bool isAccess = false;
-        if (StaffCredentials[bytes(UCode)].length != 0) {
-            StaffDetails[] memory SD = StaffCredentials[bytes(UCode)];
-            for (uint128 i = 0; i < SD.length; i++) {
-                if (
-                    keccak256(StaffCredentials[bytes(UCode)][i].UserName) ==
-                    keccak256(bytes(userName)) &&
-                    keccak256(StaffCredentials[bytes(UCode)][i].Password) ==
-                    keccak256(bytes(Password))
-                ) {
-                    isAccess = true;
-                }
-            }
-        }
-
-        require(isAccess, "you don't have access to proceed further");
-        _;
-    }
-
-
-    //*********************************functions*************** */
-
-    function UniversityRegistration(
-        string memory UCode,
-        string memory UName,
-        string memory Password,
-        address _add
-    ) public isOwner(msg.sender) returns (bool status, bytes memory Message,UniversityDetails[] memory data) {
-        UniversityDetails memory UD;
-        UD.UserName = bytes(UName);
-        UD.Password = bytes(Password);
-        UD.Add = _add;
-        UniversityCredentials[bytes(UCode)] = UD;
-        status = true;
-        Message = "Successfully inserted";
-        universityCodes.push(bytes(UCode));
-        data= getAllUniversityCredentials();
-        emit StaffRegistered(status, string(Message), data);
-    }
-
-    function UpdateUniversityDetails(
-        string memory UCode,
-        string memory UName,
-        string memory Password,
-        address _add,
-        bool IsRemove
-    ) public isOwner(msg.sender) returns (bool status, bytes memory Message) {
-        if (IsRemove) {
-            delete UniversityCredentials[bytes(UCode)];
-        } else {
-            UniversityDetails memory UD;
-            UD.UserName = bytes(UName);
-            UD.Password = bytes(Password);
-            UD.Add = _add;
-            UniversityCredentials[bytes(UCode)] = UD;
-        }
-        status = true;
-        Message = "Successfully updated";
-    }
-    
-
-    function StaffRegistration(
-        string memory UCode,
-        string memory StaffName,
-        string memory Password,
-        address _add
-    )
-        public
-        isUniversityAccess(UCode, StaffName, Password, msg.sender)
-        returns (bool status, bytes memory Message)
-    {
-        StaffDetails memory SD;
-        SD.UserName = bytes(StaffName);
-        SD.Password = bytes(Password);
-        SD.Add = _add;
-        StaffCredentials[bytes(UCode)].push(SD);
-        status = true;
-        Message = "Successfully inserted";
-
-    }
-
-    function UpdateStaffDetails(
-        string memory UCode,
-        string memory StaffName,
-        string memory Password,
-        string memory OldPassword,
-        address _add,
-        bool IsRemove
-    )
-        public
-        isUniversityAccess(UCode, StaffName, OldPassword, msg.sender)
-        returns (bool status, bytes memory Message)
-    {
-        StaffDetails[] storage SD = StaffCredentials[bytes(UCode)];
-        for (uint128 i = 0; i < SD.length; i++) {
-            if (
-                keccak256(SD[i].UserName) ==
-                keccak256(bytes(StaffName)) &&
-                keccak256(SD[i].Password) ==
-                keccak256(bytes(Password))
-            ) {
-                if (IsRemove) {
-                    delete StaffCredentials[bytes(UCode)][i];
-                } else {
-                    SD[i].Password = bytes(Password);
-                    SD[i].Add = _add;
-                }
-                break;
-            }
-        }
-
-        status = true;
-        Message = "Successfully updated";
-    }
-
-    function getAllUniversityCredentials() 
-    public 
-    view 
-    returns (UniversityDetails[] memory) 
-{
-    uint256 length = universityCodes.length;
-    UniversityDetails[] memory allUniversities = new UniversityDetails[](length);
-    
-    for (uint256 i = 0; i < length; i++) {
-        allUniversities[i] = UniversityCredentials[universityCodes[i]];
-    }
-    
-    return allUniversities;
-}
-
-
+ //*********************************functions*************** */
     function CreateCertificate(
-        string memory userName,
-        string memory Password,
         CertificateDetails memory details
     )
         public
-        isStaffAccess(string(details.UniversityCode), userName, Password)
+        isOwner(msg.sender)
         returns (bool status, bytes memory Message)
     {
         if (bytes(Certificates[bytes(details.CertificateNumber)].CertificateNumber).length != 0) {
@@ -226,12 +53,10 @@ event StaffRegistered(bool status, string message, UniversityDetails[] data);
     }
 
     function UpdateCertificate(
-        string memory userName,
-        string memory Password,
         CertificateDetails memory details
     )
         public
-        isStaffAccess(string(details.UniversityCode), userName, Password)
+       isOwner(msg.sender)
         returns (bool status, bytes memory Message)
     {
         Certificates[bytes(details.CertificateNumber)] = details;
