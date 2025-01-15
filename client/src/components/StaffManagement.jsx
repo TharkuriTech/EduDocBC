@@ -21,18 +21,21 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Select,MenuItem,
 } from "@mui/material";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Radio from "@mui/material/Radio";
-import { styled } from "@mui/material/styles";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import database from "../firebase";
-import {StyledCard,StyledButton,StyledTableHead,StyledTextField} from '../content/js/style'
-import {fireAlert} from '../content/js/app';
-
-
+import {
+  StyledCard,
+  StyledButton,
+  StyledTableHead,
+  StyledTextField,
+} from "../content/js/style";
+import { GetUniversityData, fireAlert } from "../content/js/app";
 
 export default function StaffRegistrationForm(Ethdata) {
   const [formData, setFormData] = useState({
@@ -52,16 +55,21 @@ export default function StaffRegistrationForm(Ethdata) {
   const [loading, setLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [UniverstiyData, setUniverstiyData] = useState([]);
 
   useEffect(() => {
     refreshData();
+    var data  = GetUniversityData(database);
+    setUniverstiyData(data);
   }, []);
 
   const refreshData = async () => {
     const snapshot = await database.ref("staff").once("value");
     if (snapshot.exists()) {
       const data = snapshot.val();
-      setStaffList(Object.entries(data).map(([id, details]) => ({ id, ...details })));
+      setStaffList(
+        Object.entries(data).map(([id, details]) => ({ id, ...details }))
+      );
     }
   };
 
@@ -179,14 +187,22 @@ export default function StaffRegistrationForm(Ethdata) {
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth>
                 <FormLabel>University</FormLabel>
-                <TextField
+                <Select
                   size="small"
                   name="university"
                   value={formData.university}
                   onChange={handleChange}
                   error={!!errors.university}
-                  helperText={errors.university ? "Required" : ""}
-                />
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  {
+                   UniverstiyData.map((University) => (
+                  <MenuItem value={University.UniversityCode}>{University.universityName}</MenuItem>
+                   ))
+                  }
+                </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={4}>
@@ -284,7 +300,11 @@ export default function StaffRegistrationForm(Ethdata) {
             <StyledButton variant="contained" color="primary" type="submit">
               {loading ? <CircularProgress size={24} /> : "Submit"}
             </StyledButton>
-            <StyledButton variant="outlined" color="secondary" onClick={handleClear}>
+            <StyledButton
+              variant="outlined"
+              color="secondary"
+              onClick={handleClear}
+            >
               Clear
             </StyledButton>
           </Box>
@@ -294,30 +314,36 @@ export default function StaffRegistrationForm(Ethdata) {
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
-              <StyledTableHead>
+                <StyledTableHead>
                   <TableCell>University</TableCell>
                   <TableCell>Staff Name</TableCell>
-                <TableCell>Username</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Phone Number</TableCell>
-                <TableCell>Certificate Access</TableCell>
-                <TableCell>Actions</TableCell>
+                  <TableCell>Username</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Phone Number</TableCell>
+                  <TableCell>Certificate Access</TableCell>
+                  <TableCell>Actions</TableCell>
                 </StyledTableHead>
               </TableHead>
               <TableBody>
                 {staffList.map((staff) => (
                   <TableRow key={staff.id}>
                     <TableCell>{staff.university}</TableCell>
-                     <TableCell>{staff.staffName}</TableCell>
-                  <TableCell>{staff.userName}</TableCell>
-                  <TableCell>{staff.email}</TableCell>
-                  <TableCell>{staff.phoneNumber}</TableCell>
-                  <TableCell>{staff.certificateAccess}</TableCell>
+                    <TableCell>{staff.staffName}</TableCell>
+                    <TableCell>{staff.userName}</TableCell>
+                    <TableCell>{staff.email}</TableCell>
+                    <TableCell>{staff.phoneNumber}</TableCell>
+                    <TableCell>{staff.certificateAccess}</TableCell>
                     <TableCell>
-                      <IconButton color="primary" onClick={() => handleEdit(staff.id)}>
+                      <IconButton
+                        color="primary"
+                        onClick={() => handleEdit(staff.id)}
+                      >
                         <EditIcon />
                       </IconButton>
-                      <IconButton color="error" onClick={() => openDeleteDialog(staff.id)}>
+                      <IconButton
+                        color="error"
+                        onClick={() => openDeleteDialog(staff.id)}
+                      >
                         <DeleteIcon />
                       </IconButton>
                     </TableCell>
@@ -333,7 +359,8 @@ export default function StaffRegistrationForm(Ethdata) {
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete this staff record? This action cannot be undone.
+            Are you sure you want to delete this staff record? This action
+            cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -348,4 +375,3 @@ export default function StaffRegistrationForm(Ethdata) {
     </Box>
   );
 }
-

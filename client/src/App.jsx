@@ -9,8 +9,8 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 function App() {
   return (
     <EthProvider>
-        {/* <Home /> */}
-        {/* <SignIn /> */}
+        <Home />
+        <SignIn />
         <UniversityManagement />
     </EthProvider>
     
