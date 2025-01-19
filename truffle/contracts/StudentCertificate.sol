@@ -42,11 +42,12 @@ contract StudentCertificate {
         isOwner(msg.sender)
         returns (bool status, bytes memory Message)
     {
-        if (bytes(Certificates[bytes(details.CertificateNumber)].CertificateNumber).length != 0) {
+            bytes memory combinedKey = abi.encodePacked(details.CertificateNumber, details.UCode);
+        if (bytes(Certificates[combinedKey].CertificateNumber).length != 0) {
             status = false;
             Message = "Certificate Already exists";
         } else {
-            Certificates[bytes(details.CertificateNumber)] = details;
+            Certificates[combinedKey] = details;
             status = true;
             Message = "Successfully added";
         }
@@ -59,24 +60,26 @@ contract StudentCertificate {
        isOwner(msg.sender)
         returns (bool status, bytes memory Message)
     {
-        Certificates[bytes(details.CertificateNumber)] = details;
+        bytes memory combinedKey = abi.encodePacked(details.CertificateNumber, details.UCode);
+        Certificates[combinedKey] = details;
         status = true;
         Message = "Successfully updated";
     }
 
     function GetCertificate(
         string memory DOB,
-        string memory RollNumber,
+        string memory UCode,
         string memory CertificateNumber
     )
         public view
         returns (CertificateDetails memory details, string memory Message)
     {
-        CertificateDetails memory Certdetails = Certificates[bytes(CertificateNumber)];
+        bytes memory combinedKey = abi.encodePacked(CertificateNumber, UCode);
+
+        CertificateDetails memory Certdetails = Certificates[combinedKey];
 
         if (
             keccak256(Certdetails.DOB) == keccak256(bytes(DOB)) &&
-            keccak256(Certdetails.StudentNumber) == keccak256(bytes(RollNumber)) &&
             keccak256(Certdetails.CertificateNumber) == keccak256(bytes(CertificateNumber))
         ) {
             details = Certdetails;
