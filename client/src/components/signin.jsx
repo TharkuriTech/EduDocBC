@@ -3,7 +3,6 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import Divider from '@mui/material/Divider';
 import FormLabel from '@mui/material/FormLabel';
 import FormControl from '@mui/material/FormControl';
 import Link from '@mui/material/Link';
@@ -11,6 +10,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import ForgotPassword from './ForgotPassword';
 import {SignInContainer,Card} from '../content/js/style';
+import database from "../firebase";
 
 export default function SignIn(props) {
   const [emailError, setEmailError] = React.useState(false);
@@ -27,7 +27,8 @@ export default function SignIn(props) {
     setOpen(false);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
+    debugger
     if (emailError || passwordError) {
       event.preventDefault();
       return;
@@ -37,6 +38,33 @@ export default function SignIn(props) {
       email: data.get('email'),
       password: data.get('password'),
     });
+
+    try {
+
+     // const snapshot = await get(ref(database, 'Admin'));
+      const snapshot = await database.ref("Admin").once("value");
+      if (snapshot.exists()) {
+        const users = snapshot.val();
+        const user = Object.values(users).find(
+          (u) => u.Username === data.get('email') && u.password === data.get('Password')
+        );
+  
+        if (user) {
+          console.log('Login successful:', user);
+          alert('Login successful!');
+          // Redirect or perform further actions
+        } else {
+          console.log('Invalid email or password');
+          alert('Invalid email or password');
+        }
+      } else {
+        console.log('No data available');
+        alert('No data available');
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      alert('An error occurred while logging in.');
+    }
   };
 
   const validateInputs = () => {
@@ -144,7 +172,7 @@ export default function SignIn(props) {
               Forgot your password?
             </Link>
           </Box>
-          <Divider>or</Divider>
+
           
         </Card>
       </SignInContainer>
