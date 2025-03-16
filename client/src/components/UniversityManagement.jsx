@@ -42,8 +42,12 @@ import {
   StyledTextField,
 } from "../content/js/style";
 import fireAlert from "../content/js/app";
+import { useAuth } from "../contexts/EthContext/AuthContext"; // Import your context
+import { Navigate } from "react-router-dom";
+
 
 export default function UniversityRegistrationForm() {
+  debugger
   const { state } = useContext(EthContext);
   const { accounts, contract } = state;
 
@@ -55,7 +59,7 @@ export default function UniversityRegistrationForm() {
     Address: "",
     IsActive: "no",
   });
-
+ const { isLoggedIn } = useAuth();
   const [errors, setErrors] = useState({});
   const [UniversityList, setUniversityList] = useState([]);
   const [editMode, setEditMode] = useState(false);
@@ -68,17 +72,11 @@ export default function UniversityRegistrationForm() {
   const [Unversitydata, setUnversitydata] = useState([]);
   let GetInitiated = 0;
 
-  // if (contract != null && Unversitydata.length == 0 && GetInitiated == 0) {
-  //   GetInitiated = 1;
-  //   setUnversitydata(GetAllUniversities(contract));
-  //   console.log(Unversitydata);
-  // }
-
   useEffect(() => {
-    refreshData();
+    refreshData(true);
   }, []);
 
-  const refreshData = async () => {
+  const refreshData = async (flag) => {
     const snapshot = await database.ref("University").once("value");
     if (snapshot.exists()) {
       const data = snapshot.val();
@@ -178,7 +176,7 @@ export default function UniversityRegistrationForm() {
         handleClear();
         setEditMode(false);
         setEditId(null);
-        refreshData();
+        refreshData(false);
       } catch (error) {
         console.error("Error submitting form:", error);
       }

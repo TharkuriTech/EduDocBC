@@ -1,4 +1,4 @@
-// import {fireAlert} from './app';
+//import {fireAlert} from './app';
 import Swal from "sweetalert2";
 import fireAlert from "../js/app";
 const Web3 = require("web3");
