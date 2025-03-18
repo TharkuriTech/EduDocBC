@@ -5,7 +5,7 @@ import UniversityManagement from "./components/UniversityManagement";
 import ForgotPassword from "./components/ForgotPassword";
 import CertificateRegistration from "./components/ManageCertificate";
 import { AuthProvider } from "./contexts/EthContext/AuthContext";
-import {ProtectedRoute} from "./contexts/ProtectedRoute";
+import ProtectedRoute from "./contexts/ProtectedRoute";
 
 
 function App() {

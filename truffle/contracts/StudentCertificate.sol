@@ -32,7 +32,7 @@ contract StudentCertificate {
         _;
     }
 
-  
+
 
  //*********************************functions*************** */
     function CreateCertificate(

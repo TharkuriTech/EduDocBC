@@ -1,14 +1,13 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "./EthContext/AuthContext";
+import { useAuth } from "./EthContext/AuthContext"; 
 
 const ProtectedRoute = ({ children }) => {
-  debugger
   const { user } = useAuth();
 
-  // if (!user) {
-  //   return children;// <Navigate to="/login" replace />;
-  // }
+  if (!user) {
+    return <Navigate to="/" replace />; 
+  }
 
   return children;
 };
