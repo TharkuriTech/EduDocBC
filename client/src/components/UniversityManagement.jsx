@@ -31,32 +31,23 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import database from "../firebase";
 import EthContext from "../contexts/EthContext/EthContext";
 import {
-  CreateUniversity,
-  UpdateUniversity,
-  GetAllUniversities,
-} from "../content/js/BlockchainIntraction";
-import {
   StyledCard,
   StyledButton,
   StyledTableHead,
   StyledTextField,
 } from "../content/js/style";
-import fireAlert from "../content/js/app";
-import { useAuth } from "../contexts/EthContext/AuthContext"; // Import your context
-import { Navigate } from "react-router-dom";
+import {fireAlert} from "../content/js/app";
+import { useAuth } from "../contexts/EthContext/AuthContext"; 
 
 
 export default function UniversityRegistrationForm() {
   debugger
   const { state } = useContext(EthContext);
-  const { accounts, contract } = state;
-
   const [formData, setFormData] = useState({
     universityName: "",
     UniversityCode: "",
     userName: "",
     password: "",
-    Address: "",
     IsActive: "no",
   });
  const { isLoggedIn } = useAuth();
@@ -101,20 +92,12 @@ export default function UniversityRegistrationForm() {
   const validateForm = () => {
     const newErrors = {};
     let isValid = true;
-    const solidityAddressPattern = /^0x[a-fA-F0-9]{40}$/;
     Object.entries(formData).forEach(([key, value]) => {
       if (value.trim() === "" && key !== "certificateAccess") {
         newErrors[key] = true;
         isValid = false;
-      } else if (
-        key == "Address" &&
-        value.trim() != "" &&
-        !solidityAddressPattern.test(value.trim())
-      ) {
-        newErrors[key] = true;
-        newErrors["Message"] = "Invalid Address format.";
-        isValid = false;
-      }
+      } 
+      
     });
     setErrors(newErrors);
     return isValid;
@@ -131,13 +114,9 @@ export default function UniversityRegistrationForm() {
             UCode: formData.UniversityCode,
             UName: formData.userName,
             Password: formData.password,
-            Address: formData.Address,
             isremove: formData.IsActive !== "yes",
           };
-          var result = await UpdateUniversity(param, contract, accounts);
-          if (result || formData.IsActive != "yes") {
             await database.ref(`University/${editId}`).update(formData);
-          }
         } else {
           // validation
           const snapshot = await database.ref("University").once("value");
@@ -145,8 +124,7 @@ export default function UniversityRegistrationForm() {
             const universities = Object.values(snapshot.val());
             const isDuplicate = universities.some(
               (university) =>
-                university.UniversityCode === formData.UniversityCode ||
-                university.Address === formData.Address
+                university.UniversityCode === formData.UniversityCode 
             );
 
             if (isDuplicate) {
@@ -158,20 +136,16 @@ export default function UniversityRegistrationForm() {
               return;
             }
           }
-          var result = false;
+          //var result = false;
           if (formData.IsActive == "yes") {
             const param = {
               UCode: formData.UniversityCode,
               UName: formData.userName,
-              Password: formData.password,
-              Address: formData.Address,
+              Password: formData.password
             };
-            result = await CreateUniversity(param, contract, accounts);
           }
-          if (result || formData.IsActive != "yes") {
             const newRef = database.ref("University").push();
             await newRef.set(formData);
-          }
         }
         handleClear();
         setEditMode(false);
@@ -190,7 +164,6 @@ export default function UniversityRegistrationForm() {
       UniversityCode: "",
       userName: "",
       password: "",
-      Address: "",
       IsActive: "no",
     });
     setErrors({});
@@ -207,7 +180,6 @@ export default function UniversityRegistrationForm() {
 
   const openDeleteDialog = (id) => {
     const University = UniversityList.find((item) => item.id === id);
-    formData.Address = University.Address;
     formData.IsActive = false;
     formData.UniversityCode = University.UniversityCode;
     formData.userName = University.userName;
@@ -228,17 +200,11 @@ export default function UniversityRegistrationForm() {
         UCode: formData.UniversityCode,
         UName: formData.userName,
         Password: formData.password,
-        Address: formData.Address,
         isremove: true,
       };
-      var result = await UpdateUniversity(param, contract, accounts);
-      if (result) {
         await database.ref(`University/${deleteId}`).remove();
         refreshData();
         closeDeleteDialog();
-      } else {
-        closeDeleteDialog();
-      }
     } catch (error) {
       console.error("Error deleting record:", error);
     }
@@ -335,26 +301,7 @@ export default function UniversityRegistrationForm() {
                 />
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={4}>
-              <FormControl fullWidth>
-                <FormLabel>Address</FormLabel>
-                <StyledTextField
-                  size="small"
-                  name="Address"
-                  value={formData.Address}
-                  onChange={handleChange}
-                  error={!!errors.Address}
-                  helperText={
-                    errors.Address
-                      ? errors["Message"] != undefined
-                        ? errors["Message"]
-                        : "Required"
-                      : ""
-                  }
-                  placeholder="Enter Address"
-                />
-              </FormControl>
-            </Grid>
+            
 
             <Grid item xs={12} sm={4}>
               <FormLabel>Active</FormLabel>
@@ -405,9 +352,6 @@ export default function UniversityRegistrationForm() {
                     Username
                   </TableCell>
                   <TableCell style={{ background: "#1976d2" }}>
-                    Address
-                  </TableCell>
-                  <TableCell style={{ background: "#1976d2" }}>
                     Active
                   </TableCell>
                   <TableCell style={{ background: "#1976d2" }}>
@@ -421,13 +365,6 @@ export default function UniversityRegistrationForm() {
                     <TableCell>{University.universityName}</TableCell>
                     <TableCell>{University.UniversityCode}</TableCell>
                     <TableCell>{University.userName}</TableCell>
-                    <TableCell id={University.Address}>
-                      {University.Address}
-                      <br></br>
-                      {Unversitydata != null && Unversitydata.length > 0
-                        ? Unversitydata[0].Add
-                        : ""}
-                    </TableCell>
                     <TableCell>{University.IsActive}</TableCell>
                     <TableCell>
                       <IconButton
